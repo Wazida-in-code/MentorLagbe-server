@@ -31,7 +31,29 @@ const tuitions = db.collection('tuitions')
 // tuition related API
 
 app.get('/tuition', async(req, res) => {
-    const cursor = tuitions.find()
+    const query = {
+      approvalStatus : "approved",
+      isActive: true
+    }
+    console.log(req.query);
+    if(req.query){
+      if(req.query.subject){
+        query.subject = req.query.subject
+      }
+      if(req.query.classLevel){
+        query.classLevel = req.query.classLevel
+      }
+      if(req.query.mode){
+        query.mode = req.query.mode;
+      }
+      if(req.query.search){
+      query.$or = [
+        { title: { $regex: req.query.search, $options: "i" } },
+        { subject: { $regex: req.query.search, $options: "i" } }
+      ]
+    }
+    }
+    const cursor = tuitions.find(query)
     const result = await cursor.toArray()
     res.send(result)
 })
