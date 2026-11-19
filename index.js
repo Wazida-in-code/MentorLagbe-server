@@ -30,7 +30,7 @@ const tuitions = db.collection('tuitions')
 
 // tuition related API
 
-app.get('/tuition', async(req, res) => {
+app.get('/browse-tuition', async(req, res) => {
     const query = {
       approvalStatus : "approved",
       isActive: true
@@ -70,6 +70,21 @@ app.post('/tuition', async(req, res) => {
     console.log(result);
     res.send(result)
 })
+
+
+app.get('/tuition', async(req, res) => {
+    const cursor = tuitions.find()
+    const result = await cursor.toArray()
+    res.send(result)
+})
+
+app.get('/tuitions/:id' , async (req, res) => {
+    const {id} = req.params 
+    const query = {_id: new ObjectId(id)}
+    const result = await tuitions.findOne(query)  
+    res.send(result)
+})
+
 
 
 // delete tuition
