@@ -29,7 +29,15 @@ const tuitions = db.collection('tuitions')
 
 
 // tuition related API
-app.post('/tutions', async(req, res) => {
+
+app.get('/tuition', async(req, res) => {
+    const cursor = tuitions.find()
+    const result = await cursor.toArray()
+    res.send(result)
+})
+
+
+app.post('/tuition', async(req, res) => {
     const tuition = req.body
     const newTuition = {
     ...tuition,
