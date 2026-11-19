@@ -26,6 +26,7 @@ const mongoClient = await connectToMongoDB()
 const db = mongoClient.db('MentorLagbe')
 const users = db.collection('user')
 const tuitions = db.collection('tuitions')
+const applications = db.collection('applications')
 
 
 // tuition related API
@@ -71,7 +72,6 @@ app.post('/tuition', async(req, res) => {
     res.send(result)
 })
 
-
 app.get('/tuition', async(req, res) => {
     const cursor = tuitions.find()
     const result = await cursor.toArray()
@@ -85,8 +85,6 @@ app.get('/tuitions/:id' , async (req, res) => {
     res.send(result)
 })
 
-
-
 // delete tuition
 app.delete('/tuition/:id', async(req, res) => {
   const {id} = req.params
@@ -94,6 +92,33 @@ app.delete('/tuition/:id', async(req, res) => {
   const result = await tuitions.deleteOne(query)
   res.send(result)
 })
+
+
+// applications related API
+
+app.post('/applications', async(req, res) => {
+   const application = req.body;
+
+  const existingApplication = await applications.findOne({
+    tuitionId: application.tuitionId,
+    userId: application.userId,
+  });
+
+  if (existingApplication) {
+    return res.send({ message: "Already applied" });
+  }
+
+  const newApplication = {
+    ...application,
+    status: "pending",
+    appliedAt: new Date(),
+  };
+    const result = await applications.insertOne(newApplication)
+    console.log(result);
+    res.send(result)
+})
+
+
 
 
 
