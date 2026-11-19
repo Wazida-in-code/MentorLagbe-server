@@ -25,7 +25,21 @@ export async function connectToMongoDB() {
 const mongoClient = await connectToMongoDB()
 const db = mongoClient.db('MentorLagbe')
 const users = db.collection('user')
+const tuitions = db.collection('tuitions')
 
+
+// tuition related API
+app.post('/tutions', async(req, res) => {
+    const tuition = req.body
+    const newTuition = {
+    ...tuition,
+    approvalStatus: "pending",
+    isActive: true,
+    createdAt: new Date()};
+    const result = await tuitions.insertOne(newTuition)
+    console.log(result);
+    res.send(result)
+})
 
 
 app.get('/users', async(req, res) => {
