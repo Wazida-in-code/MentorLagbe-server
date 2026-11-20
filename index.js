@@ -131,6 +131,14 @@ app.get('/applications', async(req, res) => {
   res.send(result);
 })
 
+// delete application
+app.delete('/applications/:id', async(req, res) => {
+  const {id} = req.params
+  const query = {_id: new ObjectId(id)}
+  const result = await applications.deleteOne(query)
+  res.send(result)
+})
+
 
 app.get('/users', async(req, res) => {
     const cursor = users.find({})
