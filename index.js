@@ -73,7 +73,8 @@ app.post('/tuition', async(req, res) => {
 })
 
 app.get('/tuition', async(req, res) => {
-    const cursor = tuitions.find()
+    const tutorId = req.query.tutorId;
+    const cursor = tuitions.find({tutorId:tutorId})
     const result = await cursor.toArray()
     res.send(result)
 })
