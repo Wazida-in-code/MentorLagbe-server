@@ -67,6 +67,24 @@ const verifyToken = async(req, res, next) => {
   
 }
 
+// verify student
+const verifyStudent = async(req, res, next) => {
+  if(req.user.role !== 'student'){
+    res.status(403).send({message: 'Forbidden'});
+    return;
+  }
+  next();
+}
+
+// verify tutor
+const verifyTutor = async(req, res, next) => {
+  if(req.user.role !== 'tutor'){
+    res.status(403).send({message: 'Forbidden'});
+    return;
+  }
+  next();
+}
+
 // tuition related API
 app.get('/browse-tuition', async(req, res) => {
     const query = {
@@ -97,7 +115,7 @@ app.get('/browse-tuition', async(req, res) => {
 })
 
 // add tuition
-app.post('/tuition', async(req, res) => {
+app.post('/tuition', verifyToken, verifyTutor, async(req, res) => {
     const tuition = req.body
     const newTuition = {
     ...tuition,
@@ -134,7 +152,7 @@ app.delete('/tuition/:id', async(req, res) => {
 
 // applications related API
 
-app.post('/applications', verifyToken, async(req, res) => {
+app.post('/applications', verifyToken, verifyStudent, async(req, res) => {
    const application = req.body;
 
   const existingApplication = await applications.findOne({
