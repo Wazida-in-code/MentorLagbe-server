@@ -25,12 +25,49 @@ export async function connectToMongoDB() {
 const mongoClient = await connectToMongoDB()
 const db = mongoClient.db('MentorLagbe')
 const users = db.collection('user')
+const sessions = db.collection('session')
 const tuitions = db.collection('tuitions')
 const applications = db.collection('applications')
 
 
-// tuition related API
+// verify token
+const verifyToken = async(req, res, next) => {
+  // find header
+  const authHeader = req.headers.authorization;
+  if(!authHeader){
+    res.status(401).send({message: 'unauthorized'});
+    return;
+  }
 
+  // find token from header
+  const token = authHeader.split(' ')[1]
+  if(!token){
+    res.status(401).send({message: 'unauthorized'});
+    return;
+  }
+
+  // find session from token
+  const query = {token};
+  const session = await sessions.findOne(query);
+  if(!session){
+    res.status(401).send({message: 'unauthorized'});
+    return;
+  }
+  // find user from session
+  const userId = session.userId;
+  const userQuery = {_id: new ObjectId(userId)};
+  const user = await users.findOne(userQuery);
+  if(!user){
+    res.status(401).send({message: 'unauthorized'});
+    return;
+  }
+
+  req.user = user;
+  next()
+  
+}
+
+// tuition related API
 app.get('/browse-tuition', async(req, res) => {
     const query = {
       approvalStatus : "approved",
@@ -97,7 +134,7 @@ app.delete('/tuition/:id', async(req, res) => {
 
 // applications related API
 
-app.post('/applications', async(req, res) => {
+app.post('/applications', verifyToken, async(req, res) => {
    const application = req.body;
 
   const existingApplication = await applications.findOne({
@@ -122,12 +159,20 @@ app.post('/applications', async(req, res) => {
 
 // get applications
 
-app.get('/applications', async(req, res) => {
+app.get('/applications', verifyToken, async(req, res) => {
   const query = {}
   if(req.query.userId){
     query.userId = req.query.userId;
   }
   if(req.query.tuitionId){
+
+     const tuitionQuery = {_id: new ObjectId(req.query.tuitionId)};
+    const tuition = await tuitions.findOne(tuitionQuery);
+    if(tuition.tutorId !== req.user._id.toString() && req.user.userRole !== 'admin'){
+      res.status(403).send({message: 'Forbidden'});  
+      return;
+    }
+
     query.tuitionId = req.query.tuitionId;
   }
 
@@ -159,7 +204,6 @@ app.patch('/applications/:id', async(req, res) => {
   const result = await applications.updateOne(query, updateApp)
   res.send(result)
 })
-
 
 
 app.get('/users', async(req, res) => {
