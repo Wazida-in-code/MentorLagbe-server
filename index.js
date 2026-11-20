@@ -127,6 +127,14 @@ app.get('/applications', async(req, res) => {
   if(req.query.userId){
     query.userId = req.query.userId;
   }
+  if(req.query.tuitionId){
+    query.tuitionId = req.query.tuitionId;
+  }
+
+  if (req.query.tutorEmail) {
+    query.tutorEmail = req.query.tutorEmail;
+  }
+
   const cursor = applications.find(query)
   const result = await cursor.toArray()
   res.send(result);
@@ -139,6 +147,19 @@ app.delete('/applications/:id', async(req, res) => {
   const result = await applications.deleteOne(query)
   res.send(result)
 })
+
+app.patch('/applications/:id', async(req, res) => {
+  const {id} = req.params
+  const query = {_id: new ObjectId(id)}
+  const updateApp = {
+    $set: {
+      status: req.body.status
+    }
+  }
+  const result = await applications.updateOne(query, updateApp)
+  res.send(result)
+})
+
 
 
 app.get('/users', async(req, res) => {
