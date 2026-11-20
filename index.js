@@ -119,7 +119,17 @@ app.post('/applications', async(req, res) => {
 })
 
 
+// get applications
 
+app.get('/applications', async(req, res) => {
+  const query = {}
+  if(req.query.userId){
+    query.userId = req.query.userId;
+  }
+  const cursor = applications.find(query)
+  const result = await cursor.toArray()
+  res.send(result);
+})
 
 
 app.get('/users', async(req, res) => {
