@@ -239,6 +239,26 @@ app.patch('/users/:id/role', async(req, res) => {
 })
 
 
+// Get all tuitions for admin
+app.get('/admin-tuitions', async(req, res) => {
+    const result = await tuitions.find().toArray();
+    res.send(result);
+});
+
+
+app.patch('/admin-tuitions/:id', async(req, res) => {
+  const {id} = req.params
+  const query = {_id: new ObjectId(id)};
+  const updateApprovalStatus  = {
+     $set: {
+      approvalStatus: req.body.approvalStatus,
+     }
+  }
+  const result = await tuitions.updateOne(query, updateApprovalStatus)
+  res.send(result)
+})
+
+
 
 app.get('/users', verifyToken, async(req, res) => {
     const cursor = users.find({})
