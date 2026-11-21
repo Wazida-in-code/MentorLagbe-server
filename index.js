@@ -224,7 +224,23 @@ app.patch('/applications/:id', async(req, res) => {
 })
 
 
-app.get('/users', async(req, res) => {
+// update user role
+
+app.patch('/users/:id/role', async(req, res) => {
+  const {id} = req.params
+  const query = {_id: new ObjectId(id)};
+  const updateRole = {
+     $set: {
+      role: req.body.role,
+     }
+  }
+  const result = await users.updateOne(query, updateRole)
+  res.send(result)
+})
+
+
+
+app.get('/users', verifyToken, async(req, res) => {
     const cursor = users.find({})
     const result = await cursor.toArray()
     res.send(result);
