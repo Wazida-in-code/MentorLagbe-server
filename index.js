@@ -294,7 +294,6 @@ app.post('/payments/checkout-verify', async(req, res) =>{
         return res.send({success: false, msg: "Payment already exist"})
       }
 
-
       const payment = {
         sessionId,
         status,
@@ -320,6 +319,15 @@ app.post('/payments/checkout-verify', async(req, res) =>{
     }
     res.send({success: false , msg: "Payment failed!"})
 })
+
+
+app.get('/users/:id/pro', async(req, res) => {
+  const {id} = req.params
+  const query = {_id: new ObjectId(id)}
+  const result = await users.findOne(query, { projection: { plan: 1 } })
+  res.send(result)
+})
+
 
 app.get('/users', verifyToken, async(req, res) => {
     const cursor = users.find({})
