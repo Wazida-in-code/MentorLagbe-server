@@ -176,7 +176,6 @@ app.post('/applications', verifyToken, verifyStudent, async(req, res) => {
 
 
 // get applications
-
 app.get('/applications', verifyToken, async(req, res) => {
   const query = {}
   if(req.query.userId){
@@ -202,6 +201,17 @@ app.get('/applications', verifyToken, async(req, res) => {
   const result = await cursor.toArray()
   res.send(result);
 })
+
+// application count
+app.get('/applications/count', async(req, res) => {
+  const query = {}
+  if(req.query.userId){
+    query.userId = req.query.userId
+  }
+  const result = await applications.countDocuments(query)
+  res.send({count : result})
+})
+
 
 // delete application
 app.delete('/applications/:id', async(req, res) => {
@@ -245,7 +255,7 @@ app.get('/admin-tuitions', async(req, res) => {
     res.send(result);
 });
 
-
+// update tuitions approvalStatus
 app.patch('/admin-tuitions/:id', async(req, res) => {
   const {id} = req.params
   const query = {_id: new ObjectId(id)};
