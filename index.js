@@ -2,7 +2,10 @@ import express from 'express'
 import 'dotenv/config'
 import cors from 'cors'
 import { MongoClient, ObjectId } from 'mongodb';
+import Stripe from 'stripe'
 
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const app = express()
 
 app.use(cors())
@@ -28,6 +31,7 @@ const users = db.collection('user')
 const sessions = db.collection('session')
 const tuitions = db.collection('tuitions')
 const applications = db.collection('applications')
+const payments = db.collection('payments')
 
 
 // verify token
@@ -269,6 +273,42 @@ app.patch('/admin-tuitions/:id', async(req, res) => {
 })
 
 
+// payments related API
+app.post('/payments/checkout-verify', async(req, res) =>{
+    const {sessionId} = req.body;
+    const {status,
+    payment_status,
+    customer_email, 
+    metadata,
+    payment_intent} = await stripe.checkout.sessions.retrieve(sessionId);
+    
+
+    if(status === 'complete' && payment_status=='paid'){
+      const payment = {
+        sessionId,
+        status,
+        payment_status,
+        customer_email, 
+        userId: metadata.userId,
+        payment_date: new Date(),
+        payment_intent
+      }
+      const result = await payments.insertOne(payment)
+      const query = {_id: new ObjectId(metadata.userId)}
+      const updatedInfo = {
+        $set : {
+          plan: 'pro'
+        }
+      }
+      const updateResult = await users.updateOne(
+        query,
+        updatedInfo
+      )
+      res.send({success: true, result, updateResult})
+      return
+    }
+    res.send({success: false , msg: "Payment failed!"})
+})
 
 app.get('/users', verifyToken, async(req, res) => {
     const cursor = users.find({})
