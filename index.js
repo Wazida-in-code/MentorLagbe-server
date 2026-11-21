@@ -276,6 +276,9 @@ app.patch('/admin-tuitions/:id', async(req, res) => {
 // payments related API
 app.post('/payments/checkout-verify', async(req, res) =>{
     const {sessionId} = req.body;
+    if(!sessionId){
+    return res.send({success: false, msg: "Session Id is required"})
+  }
     const {status,
     payment_status,
     customer_email, 
@@ -284,6 +287,14 @@ app.post('/payments/checkout-verify', async(req, res) =>{
     
 
     if(status === 'complete' && payment_status=='paid'){
+
+       const sessionQuery = {sessionId}
+      const existingPayment = await payments.findOne(sessionQuery)
+      if(existingPayment){
+        return res.send({success: false, msg: "Payment already exist"})
+      }
+
+
       const payment = {
         sessionId,
         status,
