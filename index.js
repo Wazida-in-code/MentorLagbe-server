@@ -247,10 +247,20 @@ app.patch('/tuition-status/:id', verifyToken, verifyTutor, async (req, res) => {
 
 
 // get six tuitions
-app.get('/six-tuitions', async(req, res) => {
-  const result = await tuitions.find().sort({ _id: -1 }).limit(6).toArray()
-  res.send(result)
-})
+app.get('/six-tuitions', async (req, res) => {
+  const query = {
+    approvalStatus: "pending",
+    isActive: true
+  };
+
+  const result = await tuitions
+    .find(query)
+    .sort({ _id: -1 })
+    .limit(6)
+    .toArray();
+
+  res.send(result);
+});
 
 
 // applications related API
