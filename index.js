@@ -90,33 +90,68 @@ const verifyTutor = async(req, res, next) => {
 }
 
 // tuition related API
-app.get('/browse-tuition', async(req, res) => {
+
+// Browse Tuitions + Search + Filters + Pagination
+app.get('/browse-tuition', async (req, res) => {
+  try {
+    // Pagination
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = 6;
+    const skip = (page - 1) * limit;
+
+    // Default filter
     const query = {
-      approvalStatus : "approved",
+      approvalStatus: "approved",
       isActive: true
+    };
+
+    // Search and filters
+    if (req.query.subject) {
+      query.subject = req.query.subject;
     }
-    console.log(req.query);
-    if(req.query){
-      if(req.query.subject){
-        query.subject = req.query.subject
-      }
-      if(req.query.classLevel){
-        query.classLevel = req.query.classLevel
-      }
-      if(req.query.mode){
-        query.mode = req.query.mode;
-      }
-      if(req.query.search){
+
+    if (req.query.classLevel) {
+      query.classLevel = req.query.classLevel;
+    }
+
+    if (req.query.mode) {
+      query.mode = req.query.mode;
+    }
+
+    if (req.query.search) {
       query.$or = [
         { title: { $regex: req.query.search, $options: "i" } },
         { subject: { $regex: req.query.search, $options: "i" } }
-      ]
+      ];
     }
-    }
-    const cursor = tuitions.find(query)
-    const result = await cursor.toArray()
-    res.send(result)
-})
+
+    // Get paginated tuitions
+    const tuitionData = await tuitions
+      .find(query)
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    // Count matching tuitions
+    const totalTuitions = await tuitions.countDocuments(query);
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalTuitions / limit);
+
+    res.send({
+      tuitions: tuitionData,
+      totalTuitions,
+      totalPages,
+      currentPage: page
+    });
+
+  } catch (error) {
+    res.status(500).send({
+      message: "Failed to fetch tuitions"
+    });
+  }
+});
+
 
 // add tuition
 app.post('/tuition', verifyToken, verifyTutor, async(req, res) => {
@@ -178,6 +213,7 @@ app.patch('/tuition/:id', async (req, res) => {
 // })
 
 
+// get six tuitions
 app.get('/six-tuitions', async(req, res) => {
   const result = await tuitions.find().sort({ _id: -1 }).limit(6).toArray()
   res.send(result)
