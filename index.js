@@ -1,3 +1,5 @@
+import dns from 'node:dns';
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 import express from 'express'
 import 'dotenv/config'
 import cors from 'cors'
@@ -486,3 +488,5 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on PORT ${PORT}`);
 })
+
+export default app;
