@@ -167,6 +167,22 @@ app.patch('/tuition/:id', async (req, res) => {
 });
 
 
+// tuition count api
+// app.get('/tuitions/count', async(req, res) => {
+//   const query = {}
+//   if(req.query.tutorId){
+//     query.tutorId = req.query.tutorId
+//   }
+//   const result = await tuitions.countDocuments(query)
+//   res.send({count : result})
+// })
+
+
+app.get('/six-tuitions', async(req, res) => {
+  const result = await tuitions.find().sort({ _id: -1 }).limit(6).toArray()
+  res.send(result)
+})
+
 
 // applications related API
 
