@@ -202,15 +202,36 @@ app.patch('/tuition/:id', async (req, res) => {
 });
 
 
+app.patch('/tuition-status/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    const result = await tuitions.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: { isActive: isActive }
+      }
+    );
+
+    res.send(result);
+
+  } catch (error) {
+    res.status(500).send({ message: "Failed to update tuition status" });
+  }
+});
+
+
+
 // tuition count api
-// app.get('/tuitions/count', async(req, res) => {
-//   const query = {}
-//   if(req.query.tutorId){
-//     query.tutorId = req.query.tutorId
-//   }
-//   const result = await tuitions.countDocuments(query)
-//   res.send({count : result})
-// })
+app.get('/tuitions/count', async(req, res) => {
+  const query = {}
+  if(req.query.tutorId){
+    query.tutorId = req.query.tutorId
+  }
+  const result = await tuitions.countDocuments(query)
+  res.send({count : result})
+})
 
 
 // get six tuitions
