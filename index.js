@@ -457,6 +457,21 @@ app.get('/transactions', verifyToken, verifyAdmin, async(req, res) => {
     res.send(result);
 })
 
+app.get('/tuition-counts', async (req, res) => {
+  const pending = await tuitions.countDocuments({
+    approvalStatus: "pending"
+  });
+
+  const approved = await tuitions.countDocuments({
+    approvalStatus: "approved"
+  });
+
+  res.send({
+    pendingTuitions: pending,
+    approvedTuitions: approved
+  });
+});
+
 
 app.get('/users', verifyToken, async(req, res) => {
     const cursor = users.find({})
