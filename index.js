@@ -89,6 +89,15 @@ const verifyTutor = async(req, res, next) => {
   next();
 }
 
+const verifyAdmin = async(req, res, next) => {
+  if(req.user.role !== 'admin'){
+    res.status(403).send({message: 'Forbidden'});
+    return;
+  }
+  next();
+}
+
+
 // tuition related API
 
 // Browse Tuitions + Search + Filters + Pagination
@@ -173,7 +182,20 @@ app.get('/tuition', async(req, res) => {
     res.send(result)
 })
 
-app.get('/tuitions/:id' , async (req, res) => {
+
+// tuition count api
+app.get('/tuitions/count', async(req, res) => {
+   console.log(req.query);
+  const query = {}
+  if(req.query.tutorId){
+    query.tutorId = req.query.tutorId
+  }
+ 
+  const result = await tuitions.countDocuments(query)
+  res.send({count : result})
+})
+
+app.get('/tuitions/:id', async (req, res) => {
     const {id} = req.params 
     const query = {_id: new ObjectId(id)}
     const result = await tuitions.findOne(query)  
@@ -223,15 +245,7 @@ app.patch('/tuition-status/:id', async (req, res) => {
 
 
 
-// tuition count api
-// app.get('/tuitions/count', async(req, res) => {
-//   const query = {}
-//   if(req.query.tutorId){
-//     query.tutorId = req.query.tutorId
-//   }
-//   const result = await tuitions.countDocuments(query)
-//   res.send({count : result})
-// })
+
 
 
 // get six tuitions
@@ -327,7 +341,7 @@ app.patch('/applications/:id', async(req, res) => {
 
 // update user role
 
-app.patch('/users/:id/role', async(req, res) => {
+app.patch('/users/:id/role', verifyToken, verifyAdmin, async(req, res) => {
   const {id} = req.params
   const query = {_id: new ObjectId(id)};
   const updateRole = {
@@ -383,12 +397,16 @@ app.post('/payments/checkout-verify', async(req, res) =>{
 
       const payment = {
         sessionId,
-        status,
-        payment_status,
-        customer_email, 
-        userId: metadata.userId,
-        payment_date: new Date(),
-        payment_intent
+      status,
+      payment_status,
+      customer_email,
+      userId: metadata.userId,
+      userName: metadata.userName,
+      userRole: metadata.userRole,
+      userPlan: metadata.userPlan,
+      amount: metadata.userAmount,
+      payment_date: new Date(),
+      payment_intent
       }
       const result = await payments.insertOne(payment)
       const query = {_id: new ObjectId(metadata.userId)}
