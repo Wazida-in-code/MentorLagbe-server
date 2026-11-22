@@ -244,10 +244,6 @@ app.patch('/tuition-status/:id', async (req, res) => {
 });
 
 
-
-
-
-
 // get six tuitions
 app.get('/six-tuitions', async(req, res) => {
   const result = await tuitions.find().sort({ _id: -1 }).limit(6).toArray()
@@ -452,6 +448,14 @@ app.patch('/update-profile/:id', async (req, res) => {
 
   res.send(result);
 });
+
+
+// transactions api
+app.get('/transactions', verifyToken, verifyAdmin, async(req, res) => {
+   const cursor = payments.find({})
+    const result = await cursor.toArray()
+    res.send(result);
+})
 
 
 app.get('/users', verifyToken, async(req, res) => {
