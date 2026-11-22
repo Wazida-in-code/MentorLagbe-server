@@ -249,7 +249,7 @@ app.patch('/tuition-status/:id', verifyToken, verifyTutor, async (req, res) => {
 // get six tuitions
 app.get('/six-tuitions', async (req, res) => {
   const query = {
-    approvalStatus: "pending",
+    approvalStatus: "approved",
     isActive: true
   };
 
