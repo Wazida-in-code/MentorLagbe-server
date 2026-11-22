@@ -203,7 +203,7 @@ app.get('/tuitions/:id', async (req, res) => {
 })
 
 // delete tuition
-app.delete('/tuition/:id', async(req, res) => {
+app.delete('/tuition/:id', verifyToken, verifyTutor, async(req, res) => {
   const {id} = req.params
   const query = {_id: new ObjectId(id)}
   const result = await tuitions.deleteOne(query)
@@ -211,7 +211,7 @@ app.delete('/tuition/:id', async(req, res) => {
 })
 
 // edit tuition
-app.patch('/tuition/:id', async (req, res) => {
+app.patch('/tuition/:id', verifyToken, verifyTutor, async (req, res) => {
   const { id } = req.params;
   const { updatedTuition } = req.body;
 
@@ -224,7 +224,7 @@ app.patch('/tuition/:id', async (req, res) => {
 });
 
 
-app.patch('/tuition-status/:id', async (req, res) => {
+app.patch('/tuition-status/:id', verifyToken, verifyTutor, async (req, res) => {
   try {
     const { id } = req.params;
     const { isActive } = req.body;
@@ -286,7 +286,7 @@ app.get('/applications', verifyToken, async(req, res) => {
 
      const tuitionQuery = {_id: new ObjectId(req.query.tuitionId)};
     const tuition = await tuitions.findOne(tuitionQuery);
-    if(tuition.tutorId !== req.user._id.toString() && req.user.userRole !== 'admin'){
+    if(tuition.tutorId !== req.user._id.toString() && req.user.role !== 'admin'){
       res.status(403).send({message: 'Forbidden'});  
       return;
     }
@@ -351,13 +351,13 @@ app.patch('/users/:id/role', verifyToken, verifyAdmin, async(req, res) => {
 
 
 // Get all tuitions for admin
-app.get('/admin-tuitions', async(req, res) => {
+app.get('/admin-tuitions', verifyToken, verifyAdmin, async(req, res) => {
     const result = await tuitions.find().toArray();
     res.send(result);
 });
 
 // update tuitions approvalStatus
-app.patch('/admin-tuitions/:id', async(req, res) => {
+app.patch('/admin-tuitions/:id', verifyToken, verifyAdmin, async(req, res) => {
   const {id} = req.params
   const query = {_id: new ObjectId(id)};
   const updateApprovalStatus  = {
@@ -429,7 +429,7 @@ app.get('/users/:id/pro', async(req, res) => {
   res.send(result)
 })
 
-app.patch('/update-profile/:id', async (req, res) => {
+app.patch('/update-profile/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
 
   const { name, phone, bio, image } = req.body;
