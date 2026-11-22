@@ -215,8 +215,7 @@ app.delete('/tuition/:id', verifyToken, verifyTutor, async(req, res) => {
 // edit tuition
 app.patch('/tuition/:id', verifyToken, verifyTutor, async (req, res) => {
   const { id } = req.params;
-  const { updatedTuition } = req.body;
-
+  const  updatedTuition  = req.body;
   const result = await tuitions.updateOne(
     { _id: new ObjectId(id) },
     { $set: updatedTuition }
