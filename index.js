@@ -224,14 +224,14 @@ app.patch('/tuition-status/:id', async (req, res) => {
 
 
 // tuition count api
-app.get('/tuitions/count', async(req, res) => {
-  const query = {}
-  if(req.query.tutorId){
-    query.tutorId = req.query.tutorId
-  }
-  const result = await tuitions.countDocuments(query)
-  res.send({count : result})
-})
+// app.get('/tuitions/count', async(req, res) => {
+//   const query = {}
+//   if(req.query.tutorId){
+//     query.tutorId = req.query.tutorId
+//   }
+//   const result = await tuitions.countDocuments(query)
+//   res.send({count : result})
+// })
 
 
 // get six tuitions
@@ -414,6 +414,26 @@ app.get('/users/:id/pro', async(req, res) => {
   const result = await users.findOne(query, { projection: { plan: 1 } })
   res.send(result)
 })
+
+app.patch('/update-profile/:id', async (req, res) => {
+  const { id } = req.params;
+
+  const { name, phone, bio, image } = req.body;
+
+  const result = await users.updateOne(
+    {_id: new ObjectId(id)},
+    {
+      $set: {
+        name,
+        phone,
+        bio,
+        image
+      }
+    }
+  );
+
+  res.send(result);
+});
 
 
 app.get('/users', verifyToken, async(req, res) => {
