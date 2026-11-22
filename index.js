@@ -153,6 +153,20 @@ app.delete('/tuition/:id', async(req, res) => {
   res.send(result)
 })
 
+// edit tuition
+app.patch('/tuition/:id', async (req, res) => {
+  const { id } = req.params;
+  const { updatedTuition } = req.body;
+
+  const result = await tuitions.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: updatedTuition }
+  );
+
+  res.send(result);
+});
+
+
 
 // applications related API
 
